@@ -1,15 +1,19 @@
 package com.example.Compose2022
 
 import android.os.Bundle
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
@@ -27,10 +31,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                   MessageCard(msg = Message(
-                       name = "Philip Jan Baruis",
-                       address = "Davao City"
-                   ))
+                   val items = IntRange(0, 1000)
+                   val messages = items.map { 
+                       Message(
+                           name = "Sachi $it",
+                           message = "Hello there Sachi $it\nHello there Sachi $it\nHello there Sachi $it\nHello there Sachi $it"
+                       )
+                   }
+                    Conversations(messages = messages)
                 }
             }
         }
@@ -61,26 +69,68 @@ fun previewTextViewCompose() {
     textViewCompose(name = "Philip Jan!")
 }
 
-data class Message(val name: String, val address: String)
+data class Message(val name: String, val message: String)
+
+
+@Composable
+fun Conversations(messages: List<Message>) {
+    LazyColumn() {
+        messages.map { 
+            item {
+                MessageCard(msg = it)
+            }
+        }
+    }
+}
 
 @Composable
 fun MessageCard(msg: Message) {
-    Row(modifier = Modifier
-        .padding(3.dp)) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_background),
-            contentDescription = "launcher bg",
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-        )
+    Compose2022Theme() {
+        Row(modifier = Modifier
+            .padding(3.dp)) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_background),
+                contentDescription = "launcher bg",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, MaterialTheme.colors.background, CircleShape)
+            )
 
-        Spacer(modifier = Modifier
-            .padding(4.dp))
+            Spacer(modifier = Modifier
+                .padding(4.dp))
 
-        Column() {
-            Text(text = "Name: ${msg.name}")
-            Text(text = "Address: ${msg.address}")
+            var isExpanded by remember { mutableStateOf(false) }
+
+            Column(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .clickable {
+                        isExpanded = !isExpanded
+                    }
+            ) {
+                Text(
+                    text = msg.name,
+                    style = MaterialTheme.typography.body1
+                )
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    elevation = 2.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "${msg.message}",
+                        style = MaterialTheme.typography.subtitle2,
+                        modifier = Modifier
+                            .padding(16.dp),
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 1
+                    )
+                }
+            }
         }
     }
 }
